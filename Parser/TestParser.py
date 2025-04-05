@@ -5,7 +5,7 @@ from Exception.CustomException import CustomException
 from Parser.Parser import Parser 
 
 def main():
-    input_file_name = r"D:\RPAL_Interpreter\RPAL_Interpreter"
+    input_file_name = r"D:\RPAL_Interpreter\RPAL_Interpreter\test.txt"
     scanner = LexicalAnalyzer(input_file_name)
     
     try:

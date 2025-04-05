@@ -1,5 +1,4 @@
-let rec Fib (A, B, N, L) =
-    A gr N -> L
-  | Fib(B, A+B, N, L aug A)
-in
-Print(Fib(0, 1, 50, nil))
+let Sum(A) = Psum (A,Order A )
+where rec Psum (T,N) = N eq 0 -> 0
+| Psum(T,N-1)+T N
+in Print ( Sum (1,2,3,4,5) )

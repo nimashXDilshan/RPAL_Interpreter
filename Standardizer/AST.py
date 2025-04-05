@@ -12,10 +12,10 @@ class AST:
         if not self.root.is_standardized:
             self.root.standardize()
     
-    def _pre_order_traverse(self, node, depth):
+    def pre_order_traverse(self, node, depth):
         print("." * depth + str(node.get_data()))
         for child in node.children:
-            self._pre_order_traverse(child, depth + 1)
+            self.pre_order_traverse(child, depth + 1)
     
     def print_ast(self):
-        self._pre_order_traverse(self.get_root(), 0)
+        self.pre_order_traverse(self.get_root(), 0)

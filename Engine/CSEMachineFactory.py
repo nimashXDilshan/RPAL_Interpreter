@@ -19,127 +19,93 @@ from Symbols.Err import Err
 from Symbols.Lambda import Lambda
 from Symbols.Delta import Delta
 from Symbols.Beta import Beta
-from Standardizer.AST import AST
-from Standardizer.Node import Node
-from typing import List
-from Symbols.Symbol import Symbol
-
-
 
 class CSEMachineFactory:
     def __init__(self):
         self.e0 = E(0)
         self.i = 1
         self.j = 0
-    
-    def get_symbol(self, node: Node) -> Symbol:
-        """Convert a node to the appropriate Symbol object based on its data"""
+
+    def get_symbol(self, node):
         data = node.get_data()
-        
-        # unary operators
-        if data in ["not", "neg"]:
-            return Uop(data)
-        
-        # binary operators
-        elif data in ["+", "-", "*", "/", "**", "&", "or", "eq", "ne", "ls", "le", "gr", "ge", "aug"]:
-            return Bop(data)
-        
-        # gamma
+        if data in ("not", "neg"):
+            return Uop(data)  # Unary operator symbol
+        elif data in ("+", "-", "*", "/", "**", "&", "or", "eq", "ne", "ls", "le", "gr", "ge", "aug"):
+            return Bop(data)  # Binary operator symbol
         elif data == "gamma":
-            return Gamma()
-        
-        # tau
+            return Gamma()  # Gamma symbol
         elif data == "tau":
-            return Tau(len(node.children))
-        
-        # ystar
+            return Tau(len(node.get_children()))  # Tau symbol with the number of children
         elif data == "<Y*>":
-            return Ystar()
-        
-        # operands <ID:>, <INT:>, <STR:>, <nil>, <true>, <false>, <dummy>
+            return Ystar()  # Y* symbol
         else:
-            if data.startswith("<ID:"):
-                return Id(data[4:-1])
-            elif data.startswith("<INT:"):
-                return Int(data[5:-1])
-            elif data.startswith("<STR:"):
-                return Str(data[6:-2])
-            elif data.startswith("<nil"):
-                return Tup()
-            elif data.startswith("<true>"):
-                return Bool("true")
-            elif data.startswith("<false>"):
-                return Bool("false")
+            if data.startswith("<IDENTIFIER:"):
+                return Id(data[12:-1])  # Identifier symbol
+            elif data.startswith("<INTEGER:"):
+                return Int(data[9:-1])  # Integer symbol
+            elif data.startswith("<STRING:"):
+                return Str(data[9:-2])  # String symbol
+            elif data.startswith("<NIL"):
+                return Tup()  # Tuple symbol
+            elif data.startswith("<TRUE_VALUE:t"):
+                return Bool("true")  # Boolean true symbol
+            elif data.startswith("<TRUE_VALUE:f"):
+                return Bool("false")  # Boolean false symbol
             elif data.startswith("<dummy>"):
-                return Dummy()
+                return Dummy()  # Dummy symbol
             else:
-                print(f"Err node: {data}")
-                return Err()
-    
-    def get_b(self, node: Node) -> B:
-        """Create and populate a B object with symbols from pre-order traversal"""
+                print("Err node:", data)
+                return Err()  # Error symbol
+
+    def get_b(self, node):
         b = B()
         b.symbols = self.get_pre_order_traverse(node)
         return b
-    
-    def get_lambda(self, node: Node) -> Lambda:
-        """Create a Lambda object from a lambda node"""
-        lambda_obj = Lambda(self.i)
+
+    def get_lambda(self, node):
+        lambda_expr = Lambda(self.i)
         self.i += 1
-        lambda_obj.set_delta(self.get_delta(node.children[1]))
-        
-        if node.children[0].get_data() == ",":
-            for identifier in node.children[0].children:
-                lambda_obj.identifiers.append(Id(identifier.get_data()[4:-1]))
+        lambda_expr.set_delta(self.get_delta(node.get_children()[1]))
+        if node.get_children()[0].get_data() == ",":
+            for identifier in node.get_children()[0].get_children():
+                lambda_expr.identifiers.append(Id(identifier.get_data()[12:-1]))
         else:
-            lambda_obj.identifiers.append(Id(node.children[0].get_data()[4:-1]))
-        
-        return lambda_obj
-    
-    def get_pre_order_traverse(self, node: Node) -> List[Symbol]: # type: ignore
-        """Traverse the AST in pre-order and convert nodes to symbols"""
+            lambda_expr.identifiers.append(Id(node.get_children()[0].get_data()[12:-1]))
+        return lambda_expr
+
+    def get_pre_order_traverse(self, node):
         symbols = []
-        
         if node.get_data() == "lambda":
-            symbols.append(self.get_lambda(node))
+            symbols.append(self.get_lambda(node))  # Lambda expression symbol
         elif node.get_data() == "->":
-            symbols.append(self.get_delta(node.children[1]))
-            symbols.append(self.get_delta(node.children[2]))
-            symbols.append(Beta())
-            symbols.append(self.get_b(node.children[0]))
+            symbols.append(self.get_delta(node.get_children()[1]))  # Delta symbol
+            symbols.append(self.get_delta(node.get_children()[2]))  # Delta symbol
+            symbols.append(Beta())  # Beta symbol
+            symbols.append(self.get_b(node.get_children()[0]))  # B symbol
         else:
             symbols.append(self.get_symbol(node))
-            for child in node.children:
+            for child in node.get_children():
                 symbols.extend(self.get_pre_order_traverse(child))
-        
         return symbols
-    
-    def get_delta(self, node: Node) -> Delta:
-        """Create and populate a Delta object with symbols from pre-order traversal"""
+
+    def get_delta(self, node):
         delta = Delta(self.j)
         self.j += 1
         delta.symbols = self.get_pre_order_traverse(node)
         return delta
-    
-    def get_control(self, ast: AST) -> List[Symbol]: # type: ignore
-        """Create the control list for the CSE machine"""
-        control = []
-        control.append(self.e0)
-        control.append(self.get_delta(ast.get_root()))
+
+    def get_control(self, ast):
+        control = [self.e0, self.get_delta(ast.get_root())]
         return control
-    
-    def get_stack(self) -> List[Symbol]:  # type: ignore
-        """Create the initial stack for the CSE machine"""
-        stack = []
-        stack.append(self.e0)
-        return stack
-    
-    def get_environment(self) -> List[E]: # type: ignore
-        """Create the initial environment for the CSE machine"""
-        environment = []
-        environment.append(self.e0)
-        return environment
-    
-    def get_cse_machine(self, ast: AST) -> 'CSEMachine':
-        """Create a CSEMachine with control, stack, and environment initialized"""
-        return CSEMachine(self.get_control(ast), self.get_stack(), self.get_environment())
+
+    def get_stack(self):
+        return [self.e0]
+
+    def get_environment(self):
+        return [self.e0]
+
+    def get_cse_machine(self, ast):
+        control = self.get_control(ast)
+        stack = self.get_stack()
+        environment = self.get_environment()
+        return CSEMachine(control, stack, environment)

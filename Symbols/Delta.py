@@ -1,10 +1,13 @@
 from Symbols.Symbol import Symbol
-
+#
 class Delta(Symbol):
     def __init__(self, index):
         super().__init__("delta")
         self._index = index
         self.symbols = []
+
+    def set_index(self, index):
+        self.index = index
 
     def get_index(self):
         return self._index

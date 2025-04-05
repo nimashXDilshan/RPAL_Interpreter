@@ -1,4 +1,5 @@
-let rec  Fact n = 
-      n eq 0 ->1 |
-      n* Fact(n-1)
-in Print(Fact(3))
+let rec Sum n =
+    n eq 0 -> 0
+  | n + Sum(n-1)
+in
+Print( Sum(10) )
