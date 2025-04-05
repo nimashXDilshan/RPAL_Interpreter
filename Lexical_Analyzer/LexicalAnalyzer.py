@@ -16,6 +16,7 @@ class LexicalAnalyzer:
                 lines = file.readlines()
                 for line_count, line in enumerate(lines, start=1):
                     try:
+                        #get line by line & tokenize that line
                         self.tokenize_line(line)
                     except CustomException as e:
                         raise CustomException(f"{e} in LINE: {line_count}\nERROR in lexical_analysis.")
@@ -25,11 +26,14 @@ class LexicalAnalyzer:
         return self.tokens
 
     def tokenize_line(self, line):
+
+        # Define regex patterns for different token types
         digit = "[0-9]"
         letter = "[a-zA-Z]"
         operator_symbol = re.compile(r"[+\-*/<>&.@/:=~|$!#%^_\[\]{}\"`\\?]")
         escape = re.compile(r"(\\\\'|\\\\t|\\\\n|\\\\\\\\)")
-        
+
+        # the f is used to insert variables letter and digit into the regex pattern
         identifier_pattern = re.compile(f"{letter}({letter}|{digit}|_)*")
         integer_pattern = re.compile(f"{digit}+")
         operator_pattern = re.compile(r"[+\-*/<>&.@/:=~|$!#%^_\[\]{}\"`\\?]+")
@@ -38,19 +42,25 @@ class LexicalAnalyzer:
         string_pattern = re.compile(r"'([a-zA-Z0-9+\-*/<>&.@/:=~|$!#%^_\[\]{}\"`\\?\\\\'\\\\t\\\\n\\\\\\\\(),;\s]*)'")
         comment_pattern = re.compile(r"//.*")
 
-        current_index = 0
+        current_index = 0 #for get the first charcter at the line
+        # tokenize a single line get one char at a time
+        
         while current_index < len(line):
             current_char = line[current_index]
             
+            #no need to tokenize comments in the language
             if comment_pattern.match(line[current_index:]):
                 break
             
+            #skip spaces and tabs in the line
             if spaces_pattern.match(line[current_index:]):
                 current_index += len(spaces_pattern.match(line[current_index:]).group())
                 continue
             
             if identifier_pattern.match(line[current_index:]):
                 identifier = identifier_pattern.match(line[current_index:]).group()
+                #set of keywords in the language, keywords are also identifiers
+                #so we need to check if the identifier is a keyword or not
                 keywords = {"let", "in", "fn", "where", "aug", "or", "not", "gr", "ge", "ls", 
                             "le", "eq", "ne", "true", "false", "nil", "dummy", "within", "and", "rec"}
                 token_type = TokenType.KEYWORD if identifier in keywords else TokenType.IDENTIFIER

@@ -1,17 +1,5 @@
-let Is_palindrome N =
-    let Reverse_num Num =
-        let rec Reverse_helper Rem Result =
-            Rem eq 0 -> Result
-            | Reverse_helper (Rem / 10) (Result * 10 + (Rem - (Rem / 10)*10))
-        in Reverse_helper Num 0
-    in N eq Reverse_num N
-
-in let rec check start end T =
-    start gr end -> T |
-        Is_palindrome start -> check (start + 1) end (T aug start) 
-        | check (start + 1) end T 
-
-in let Palindrome_range A B = 
-    check A B nil
-
-in Print(Palindrome_range 1 10)
+let rec Fib (A, B, N, L) =
+    A gr N -> L
+  | Fib(B, A+B, N, L aug A)
+in
+Print(Fib(0, 1, 50, nil))
