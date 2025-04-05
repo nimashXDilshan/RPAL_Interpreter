@@ -4,7 +4,6 @@ from Symbols.Rator import Rator
 from Symbols.Eta import Eta
 from Symbols.E import E
 from Symbols.B import B
-from Symbols.Symbol import Symbol
 from Symbols.Uop import Uop
 from Symbols.Bop import Bop
 from Symbols.Gamma import Gamma
@@ -256,37 +255,6 @@ class CSEMachine:
     def clear_file(file_path):
         open(file_path, 'w').close()
                 
-    
-    # def print_control(self):
-    #     print("Control: ", end="")
-    #     for symbol in self.control:
-    #         print(symbol.get_data(), end="")
-    #         if isinstance(symbol, Lambda):
-    #             print(symbol.get_index(), end="")
-    #         elif isinstance(symbol, Delta):
-    #             print(symbol.get_index(), end="")
-    #         elif isinstance(symbol, E):
-    #             print(symbol.get_index(), end="")
-    #         elif isinstance(symbol, Eta):
-    #             print(symbol.get_index(), end="")
-    #         print(",", end="")
-    #     print()
-    
-    # def print_stack(self):
-    #     print("Stack: ", end="")
-    #     for symbol in self.stack:
-    #         print(symbol.get_data(), end="")
-    #         if isinstance(symbol, Lambda):
-    #             print(symbol.get_index(), end="")
-    #         elif isinstance(symbol, Delta):
-    #             print(symbol.get_index(), end="")
-    #         elif isinstance(symbol, E):
-    #             print(symbol.get_index(), end="")
-    #         elif isinstance(symbol, Eta):
-    #             print(symbol.get_index(), end="")
-    #         print(",", end="")
-    #     print()
-    
     def print_environment(self):
         for symbol in self.environment:
             print(f"e{symbol.get_index()} --> ", end="")
