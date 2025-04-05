@@ -26,7 +26,7 @@ class Parser:
             for token in self.tokens:
                 print(f"<{token.type}, {token.value}>")
             return None
-    
+        
     def convert_AST_to_StringAST(self):
         print("Converting AST to String.......")
         
@@ -62,24 +62,13 @@ class Parser:
         return self.stringAST
     
     def add_strings(self, dots, node):
-        if node.type == NodeType.IDENTIFIER:
-            self.stringAST.append(f"{dots}<ID:{node.value}>")
-        elif node.type == NodeType.INTEGER:
-            self.stringAST.append(f"{dots}<INT:{node.value}>")
-        elif node.type == NodeType.STRING:
-            self.stringAST.append(f"{dots}<STR:{node.value}>")
-        elif node.type == NodeType.TRUE_VALUE:
-            self.stringAST.append(f"{dots}<{node.value}>")
-        elif node.type == NodeType.FALSE_VALUE:
-            self.stringAST.append(f"{dots}<{node.value}>")
-        elif node.type == NodeType.NIL:
-            self.stringAST.append(f"{dots}<{node.value}>")
-        elif node.type == NodeType.DUMMY:
-            self.stringAST.append(f"{dots}<{node.value}>")
+        if node.type in [NodeType.IDENTIFIER, NodeType.INTEGER, NodeType.STRING, NodeType.TRUE_VALUE,
+                         NodeType.FALSE_VALUE, NodeType.NIL, NodeType.DUMMY]:
+            self.stringAST.append(dots + "<" + node.type.name.upper() + ":" + node.value + ">")
         elif node.type == NodeType.FCN_FORM:
-            self.stringAST.append(f"{dots}function_form")
+            self.stringAST.append(dots + "function_form")
         else:
-            self.stringAST.append(f"{dots}{node.value}")
+            self.stringAST.append(dots + node.value)
     
     
     # Expression parsing methods
@@ -102,12 +91,9 @@ class Parser:
             else:
                 # print(self.tokens[0].value)
                 self.tokens.pop(0)  # Remove fn
-                while True:
+                while (self.tokens[0].type == TokenType.IDENTIFIER or self.tokens[0].value == "("):
                     self.Vb()
-                    n += 1
-                    if not (self.tokens[0].type == TokenType.IDENTIFIER or self.tokens[0].value == "("):
-                        break
-                
+                    n += 1                
                 if self.tokens[0].value != ".":
                     print("Parse error at E : '.' Expected")
                 # print(self.tokens[0].value)
@@ -193,7 +179,7 @@ class Parser:
         # print("Bp()")
         self.A()
         token = self.tokens[0]
-        if token.value in [">", ">=", "<", "<="] or token.value in ["gr", "ge", "ls", "le", "eq", "ne"]:
+        if token.value in [">", ">=", "<", "<=" , "gr", "ge", "ls", "le", "eq", "ne"]:
             # print(self.tokens[0].value)
             self.tokens.pop(0)
             self.A()
@@ -330,6 +316,7 @@ class Parser:
             else:
                 print("Parsing error at Rn: Unexpected PUNCTUATION")
         else:
+            
             print("Parsing error at Rn: Expected a Rn, but got different")
     
     # Definition parsing methods
@@ -367,7 +354,8 @@ class Parser:
     
     def Db(self):
         # print("Db()")
-        if self.tokens[0].type == TokenType.PUNCTUATION and self.tokens[0].value == "(":
+
+        if self.tokens[0].type == TokenType.PUNCTUATION and self.tokens[0].value == "(": # Db's production 3
             # print(self.tokens[0].value)
             self.tokens.pop(0)
             self.D()
@@ -375,18 +363,19 @@ class Parser:
                 print("Parsing error at Db #1")
             # print(self.tokens[0].value)
             self.tokens.pop(0)
-        elif self.tokens[0].type == TokenType.IDENTIFIER:
+
+
+        elif self.tokens[0].type == TokenType.IDENTIFIER: # Db's production 1 & 2
             if self.tokens[1].value == "(" or self.tokens[1].type == TokenType.IDENTIFIER:  # Expect a fcn_form
                 self.AST.append(Node(NodeType.IDENTIFIER, self.tokens[0].value, 0))
                 # print(self.tokens[0].value)
                 self.tokens.pop(0)  # Remove ID
                 
                 n = 1  # Identifier child
-                while True:
+                while self.tokens[0].type == TokenType.IDENTIFIER or self.tokens[0].value == "(":
                     self.Vb()
                     n += 1
-                    if not (self.tokens[0].type == TokenType.IDENTIFIER or self.tokens[0].value == "("):
-                        break
+
                 if self.tokens[0].value != "=":
                     print("Parsing error at Db #2")
                 # print(self.tokens[0].value)
@@ -415,7 +404,7 @@ class Parser:
     # Variable parsing methods
     def Vb(self):
         # print("Vb()")
-        if self.tokens[0].type == TokenType.PUNCTUATION and self.tokens[0].value == "(":
+        if self.tokens[0].type == TokenType.PUNCTUATION and self.tokens[0].value == "(":# Vb's 2 & 3 productions
             # print(self.tokens[0].value)
             self.tokens.pop(0)
             is_vl = False
@@ -423,22 +412,26 @@ class Parser:
             if self.tokens[0].type == TokenType.IDENTIFIER:
                 self.Vl()
                 is_vl = True
+
             if self.tokens[0].value != ")":
                 print("Parse error unmatch )")
             # print(self.tokens[0].value)
             self.tokens.pop(0)
             if not is_vl:
                 self.AST.append(Node(NodeType.EMPTY_PARAMS, "()", 0))
-        elif self.tokens[0].type == TokenType.IDENTIFIER:
+
+        elif self.tokens[0].type == TokenType.IDENTIFIER: # Vb's 1 productions
             self.AST.append(Node(NodeType.IDENTIFIER, self.tokens[0].value, 0))
             # print(self.tokens[0].value)
             self.tokens.pop(0)
     
+    #comma seperated variable list in Vl
+
     def Vl(self):
         # print("Vl()")
         n = 0
         while True:
-            if n > 0:
+            if n > 0: # remove that comma token before parsing the next identifier.
                 # print(self.tokens[0].value)
                 self.tokens.pop(0)
             if self.tokens[0].type != TokenType.IDENTIFIER:
@@ -449,4 +442,5 @@ class Parser:
             n += 1
             if self.tokens[0].value != ",":
                 break
-        self.AST.append(Node(NodeType.COMMA, ",", n))
+        if n >1:
+            self.AST.append(Node(NodeType.COMMA, ",", n))

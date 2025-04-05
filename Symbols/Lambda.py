@@ -1,16 +1,13 @@
 from Symbols.Symbol import Symbol
-from Symbols.Id import Id
-from Symbols.Delta import Delta
 
 class Lambda(Symbol):
-    def __init__(self, i):
+    def __init__(self, index):
         super().__init__("lambda")
-        self.set_index(i)
+        self.index=index
+        self.environment =None
         self.identifiers = []  # List of Id objects
         self.delta = None
-    
-    def set_index(self, i):
-        self.index = i
+
     
     def get_index(self):
         return self.index

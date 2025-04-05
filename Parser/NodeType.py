@@ -33,6 +33,7 @@ class NodeType(Enum):
     EQUAL = "equal"
     COMMA = "comma"
     EMPTY_PARAMS = "empty_params"
+    
     # Uncomment and add more if needed:
     # Y_STAR = "y_star"
     # LAMBDA_EXPRESSION = "lambda_expression"
