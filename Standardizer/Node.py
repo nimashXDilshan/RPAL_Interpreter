@@ -1,6 +1,3 @@
-
-
-
 class Node:
     # Node class for the Standardizer
     

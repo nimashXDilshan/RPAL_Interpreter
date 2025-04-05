@@ -18,7 +18,7 @@ class Parser:
         self.tokens.append(Token(TokenType.END_OF_TOKENS, ""))
         self.E()
         if self.tokens[0].type == TokenType.END_OF_TOKENS:
-            print("Parsing Successful!")
+            #print("Parsing Successful!")
             return self.AST
         else:
             print("Parsing Unsuccessful!")
@@ -28,7 +28,7 @@ class Parser:
             return None
         
     def convert_AST_to_StringAST(self):
-        print("Converting AST to String.......")
+        #print("Converting AST to String.......")
         
         dots = ""
         stack = []

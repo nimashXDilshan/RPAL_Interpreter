@@ -3,7 +3,6 @@
 from Engine.CSEMachine import CSEMachine
 from Symbols.E import E
 from Symbols.B import B
-from Symbols.Symbol import Symbol
 from Symbols.Uop import Uop
 from Symbols.Bop import Bop
 from Symbols.Gamma import Gamma
